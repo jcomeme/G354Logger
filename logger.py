@@ -47,6 +47,11 @@ while True:
 controller = G354Controller.GController(tty, baud)
 
 
+args = sys.argv
+path = ''
+if len(args) > 1:
+    path = args[1]
+
 
 controller.writeRegister(b'\x0a', b'\x80', b'\x01')#ソフトリセット
 sleep(0.8)#800ms待つ
@@ -62,7 +67,7 @@ while controller.ser.read():
 
 controller.writeRegister(b'\x03', b'\x02', b'\x00')#コンフィグモードへ移行
 
-controller.writeRegister(b'\x05', b'\x09', b'\x01')#dout rate 設定。00で2000SPS, 値が1増えるごとに1/2になる
+controller.writeRegister(b'\x05', b'\x00', b'\x01')#dout rate 設定。00で2000SPS, 値が1増えるごとに1/2になる
 controller.writeRegister(b'\x08', b'\x01', b'\x01')#UART設定。末尾ビット0で手動、1で自動
 controller.writeRegister(b'\x0c', b'\x02', b'\x01')#バースト制御。- - - - - GPIO_OUT COUNT_OUT CHKSM_OUT
 controller.writeRegister(b'\x0d', b'\x70', b'\x01')#バースト制御。FLAG_OUT TEMP_OUT GYRO_OUT ACCL_OUT - - - -
@@ -83,6 +88,11 @@ highbuffer = 0
 
 counter = 0
 
+if path != '':
+    with open(path, mode='w') as f:
+        f.write('address, temp, gyro_x, gyro_y, gyro_z, accl_x, accl_x, accl_x, count, delimiter\n')
+
+
 while 1:
     for item in range(0, 18):
         c = controller.ser.read()
@@ -94,6 +104,9 @@ while 1:
             #if counter == 10:
             if True:
                 print(linebuffer)
+                if path != '':
+                    with open(path, mode='a') as f:
+                        f.write(linebuffer + '\n')
                 counter = 0
             highbuffer = 0
             linebuffer = ''
