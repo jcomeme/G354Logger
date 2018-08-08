@@ -30,11 +30,6 @@ controller.writeRegister(b'\x05', b'\x00', b'\x01')
 python logger.py
 ```
 
-csvに出力する場合
-
-```
-python logger.py >> spam.csv
-```
 
 止める時はCtrl-Cで。
 
